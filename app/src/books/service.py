@@ -2,9 +2,11 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from .schemas import BookCreateModel, BookUpdateModel
 from sqlmodel import select, desc
 from .models import Book
-from src.config import settings
+from src.config import config
+from datetime import datetime
 
-settings.DATABASE_URL
+
+DATABASE_URL=config.DATABASE_URL
 class BookService:
     async def get_all_books(self,session:AsyncSession):
         statement = select(Book).order_by(desc(Book.created_at))
@@ -22,6 +24,7 @@ class BookService:
         new_book = Book(
             **book_data_dict
         )
+        new_book.published_date = datetime.strptime(book_data_dict['published_date'],"%Y-%m-%d")
         session.add(new_book)
         await session.commit()
         return new_book
@@ -45,6 +48,7 @@ class BookService:
         if book_to_delete is not None:
             await session.delete(book_to_delete)
             await session.commit()
+            return {}
         
         else:
             return None
