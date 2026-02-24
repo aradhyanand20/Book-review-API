@@ -1,9 +1,9 @@
 from sqlmodel import SQLModel, Field, Column
 import sqlalchemy.dialects.postgresql as pg
-from datetime import datetime,date
+from datetime import datetime,date, timezone
 import uuid
 
-
+datetime.now()
 
 class Book(SQLModel, table= True):
     __tablename__ ="books"
@@ -22,8 +22,8 @@ class Book(SQLModel, table= True):
     published_date: date
     page_count: int
     language: str
-    created_at: datetime = Field(sa_column=Column(pg.TIMESTAMP), default_factory=datetime.now)
-    update_at: datetime= Field(sa_column=Column(pg.TIMESTAMP), default_factory=datetime.now)
+    created_at: datetime = Field(sa_column=Column(pg.TIMESTAMP(timezone=True)), default_factory=lambda: datetime.now(timezone.utc))
+    update_at: datetime= Field(sa_column=Column(pg.TIMESTAMP(timezone=True)), default_factory=lambda: datetime.now(timezone.utc))
 
     def __repr__(self):
         return f"<Book {self.title}>"
