@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from src.auth.models import User
 from src.books.routes import book_router
 from contextlib import asynccontextmanager
 from src.db.main import init_db

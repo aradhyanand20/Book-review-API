@@ -34,13 +34,14 @@ class BookService:
     async def update_book(self,book_uid:UUID,book_data: BookUpdateModel, session:AsyncSession):
         book_to_update =  await self.get_book(book_uid,session)
         if book_to_update is not None:
-            update_date_dict = book_data.model_dump()
+            update_date_dict = book_data.model_dump(exclude_unset=True)
 
             for k, v in update_date_dict.items():
                 setattr(book_to_update,k,v)
 
             await session.commit()
             await session.refresh(book_to_update)
+            return book_to_update
         else:
             return None
 
