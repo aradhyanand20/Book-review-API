@@ -63,4 +63,5 @@ def downgrade() -> None:
                existing_type=sa.Date(),
                type_=sa.VARCHAR(),
                existing_nullable=False)
+    op.drop_table('users')
     # ### end Alembic commands ###
