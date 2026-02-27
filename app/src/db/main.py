@@ -1,4 +1,4 @@
-from sqlmodel import create_engine, text, SQLModel
+from sqlmodel import  SQLModel
 from src.config import config
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -19,6 +19,7 @@ Session = async_sessionmaker(
 async def init_db():
         async with engine.begin() as conn:
                 from src.books.models import Book
+                from src.auth.models import User
                 
                 await conn.run_sync(SQLModel.metadata.create_all)
 

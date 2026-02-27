@@ -7,3 +7,4 @@ __pycache__/
 learn.py
 learn_db.py
 mydb.db
+run.py
