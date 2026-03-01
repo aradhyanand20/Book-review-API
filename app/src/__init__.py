@@ -18,7 +18,8 @@ app = FastAPI(
     title="Bookly",
     description=" A REST API for the book review web service",
     version= ver,
-    lifespan= life_span
+    lifespan= life_span,
+    swagger_ui_parameters={"persistAuthorization": True}
 )
 app.include_router(book_router,prefix=f"/api/{ver}/books", tags=['books'])
 app.include_router(auth_router,prefix=f"/api/{ver}/auth", tags=['auth'])
