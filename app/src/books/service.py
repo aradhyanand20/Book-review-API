@@ -56,3 +56,17 @@ class BookService:
         
         else:
             return None
+
+
+ 	
+# Response body
+# Download
+# {
+#   "message": "Login successful",
+#   "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImVtYWlsIjoiYXJhZGh5YW5hbmQyMEBnbWFpbC5jb20iLCJ1c2VyX3VpZCI6ImJkNjY0ZjFmLTZjZjEtNGE2Yi04ODdhLWJkNzA1ZmRkMThjOSJ9LCJleHAiOjE3NzI0NjY4MzcsImp0aSI6IjBmNjRhMTU1LTBkZjktNDk4Yy1iYTFhLTc3YWQ2MzAyOTc4NyIsInJlZnJlc2giOmZhbHNlfQ.CYGbPTamlrOsYbJDG-IzZ_NrzVFX2gZxSWxdXa-oWWo",
+#   "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImVtYWlsIjoiYXJhZGh5YW5hbmQyMEBnbWFpbC5jb20iLCJ1c2VyX3VpZCI6ImJkNjY0ZjFmLTZjZjEtNGE2Yi04ODdhLWJkNzA1ZmRkMThjOSJ9LCJleHAiOjE3NzI2MzYwMzcsImp0aSI6IjE1YjQ3ZmZjLTk1OWMtNDAzOC1hOWJhLTQyZDczNWJhZmYxZCIsInJlZnJlc2giOnRydWV9.OAmOhaTx3rFriQHYL9AxzAHVD53FiMcHkX4CZa5En-I",
+#   "user": {
+#     "email": "aradhyanand20@gmail.com",
+#     "uid": "bd664f1f-6cf1-4a6b-887a-bd705fdd18c9"
+#   }
+# }

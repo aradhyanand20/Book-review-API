@@ -4,6 +4,7 @@ import jwt
 from src.config import config
 import uuid
 import logging
+from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 
 passwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -38,4 +39,6 @@ def decode_token(token:str) -> dict:
     
     except jwt.PyJWKError as e:
         logging.exception(e)
+        return None
+    except ExpiredSignatureError:
         return None
