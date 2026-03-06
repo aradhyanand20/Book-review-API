@@ -4,7 +4,8 @@ from src.books.routes import book_router
 from src.auth.routes import auth_router
 from contextlib import asynccontextmanager
 from src.db.main import init_db
-
+from src.auth.models import User
+from src.books.models import Book
 @asynccontextmanager
 async def life_span(app:FastAPI):
     print("Server is starting. . . .")
