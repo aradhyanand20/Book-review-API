@@ -18,8 +18,8 @@ Session = async_sessionmaker(
         )
 async def init_db():
         async with engine.begin() as conn:
-                from src.books.models import Book
-                from src.auth.models import User
+                from src.db.models import Book
+                from src.db.models import User
                 
                 await conn.run_sync(SQLModel.metadata.create_all)
 

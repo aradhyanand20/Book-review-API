@@ -8,7 +8,7 @@ from src.db.main import get_session
 from sqlmodel.ext.asyncio.session import AsyncSession
 from .service import UserService
 from typing import List, Any
-from .models import User
+from db.models import User
 user_service = UserService()
 
 class TokenBearer(HTTPBearer):
