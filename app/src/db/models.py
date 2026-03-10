@@ -7,6 +7,14 @@ from typing import List,Optional
 
 datetime.now()
 
+
+
+class BookTag(SQLModel,table=True):
+    __tablename__ ="book_tags"
+    book_id:uuid.UUID = Field(default=None,foreign_key="books.uid", primary_key=True)
+    tag_id:uuid.UUID = Field(default=None,foreign_key="tags.uid", primary_key=True)
+
+
 class Book(SQLModel, table= True):
     __tablename__ ="books"
     uid: uuid.UUID= Field(
@@ -29,6 +37,8 @@ class Book(SQLModel, table= True):
     update_at: datetime= Field(sa_column=Column(pg.TIMESTAMP(timezone=True)), default_factory=lambda: datetime.now(timezone.utc))
     user: Optional["User"] = Relationship(back_populates="books")
     reviews: List["Review"] = Relationship(back_populates="book", sa_relationship_kwargs={'lazy':"selectin"})
+
+    tags: List['Tags'] = Relationship(back_populates="books", link_model=BookTag)
 
     def __repr__(self):
         return f"<Book {self.title}>"
@@ -88,3 +98,27 @@ class Review(SQLModel, table= True):
 
     def __repr__(self):
         return f"<Review for book {self.book_uid} by user {self.user_uid}>"
+    
+
+class Tags(SQLModel, table= True):
+    __tablename__ ="tags"
+    uid: uuid.UUID= Field(
+        default_factory= uuid.uuid4,
+        sa_column=Column(
+            pg.UUID(as_uuid=True),
+            nullable = False,
+            primary_key =True,
+            
+        )
+    )
+    name: str
+    created_at: datetime = Field(sa_column=Column(pg.TIMESTAMP(timezone=True)), default_factory=lambda: datetime.now(timezone.utc))
+
+    books: List['Book'] = Relationship(back_populates="tags", link_model=BookTag)
+ 
+
+    def __repr__(self):
+        return f"<Tag for book {self.uid}>"
+    
+
+    

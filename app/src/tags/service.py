@@ -25,10 +25,67 @@ class TagService:
             raise HTTPException(status_code=404, detail="book not found")
         
         for tag_item in tag_data.tags:
-            result = await session.exc(
-                select(Tags).
+            result = await session.exec(
+                select(Tags).where(Tags.name == tag_item.name)
             )
-            result = await session
+            tag = result.one_or_none()
+            if not tag:
+                tag = Tags(name=tag_item.name)
+            book.tags.append(tag)
+        session.add(book)
+        await session.commit()
+        await session.refresh(book)
+        return book
+    
+    async def get_tag_by_uid(self, tag_uid:str, session:AsyncSession):
+        statement = select(Tags).where(Tags.uid == tag_uid)
+        result = await session.exec(statement)
+
+        return result.first()
+    
+    async def add_tag(self, tag_data:TagCreateModel, session:AsyncSession):
+        statement = select(Tags).where(Tags.name == tag_data.name)
+        result = await session.exec(statement)
+        tag = result.first()
+        if tag:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Tag exists"
+            )
+        new_tag =Tags(name=tag_data.name)
+        session.add(new_tag)
+        await session.commit()
+        return new_tag
+    
+    async def update_tag(
+            self,tag_uid, tag_update_data:TagCreateModel, session:AsyncSession
+    ):
+        tag = await self.get_tag_by_uid(tag_uid,session)
+        update_data_dict = tag_update_data.model_dump()
+
+        for k,v in update_data_dict.items():
+            setattr(tag,k,v)
+            
+        await session.commit()
+        await session.refresh(tag)
+
+        return tag
+    
+    async def delete_tag(self,tag_uid:str, session:AsyncSession):
+        tag = await  self.get_tag_by_uid(tag_uid,session)
+        if not tag:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="tag does not exist"
+            )
+        await session.delete(tag)
+        await session.commit()
+    
+
+
+
+
+            
         
 
  
