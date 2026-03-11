@@ -10,6 +10,7 @@ from fastapi.responses import JSONResponse
 from .dependencies import RefreshTokenBearer, AccessTokenBearer, get_current_user, RoleChecker
 from src.db.redis import add_jti_to_blocklist
 
+from src.errors import UserAlreadyExists,UserNotFound, InvalidCredentials,InvalidToken
 
 
 
@@ -28,7 +29,7 @@ async def create_user_account(user_data:UserCreateModel,
     user_exists = await user_service.user_exists(email,session)
 
     if user_exists:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail= "user already exists")
+        raise UserAlreadyExists
     new_user = await user_service.create_user(user_data, session)
     return new_user
 
@@ -78,10 +79,7 @@ async def login_users(
 
                 }
             )
-    raise HTTPException(
-        status_code=status.HTTP_403_FORBIDDEN,
-        detail="Invalid Email or Password"
-    )
+    raise InvalidCredentials  
             
    
    
@@ -97,9 +95,7 @@ async def get_new_access_token(token_details:dict= Depends(RefreshTokenBearer())
         return JSONResponse(content={
             "access_token": new_access_token
         })
-    raise HTTPException(
-        status_code= status.HTTP_400_BAD_REQUEST, detail="Invalid or maybe expired token"
-    )
+    raise InvalidToken
 
 @auth_router.get('/me', response_model=UserBookModel)
 async def get_me(user= Depends(get_current_user),_: bool = Depends(role_checker)):

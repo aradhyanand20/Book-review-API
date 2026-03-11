@@ -6,6 +6,7 @@ from src.books.service import BookService
 from src.db.models import Tags
 from .schemas import TagAddModel, TagCreateModel
 from uuid import UUID
+from src.errors import TagNotFound, BookNotFound, TagAlreadyExists
 
 book_service = BookService()
 
@@ -22,7 +23,7 @@ class TagService:
     async def add_tag_to_books(self,book_uid:str,tag_data:TagAddModel,session:AsyncSession):
         book = await book_service.get_book(book_uid=book_uid, session=session)
         if not book:
-            raise HTTPException(status_code=404, detail="book not found")
+            raise BookNotFound()
         
         for tag_item in tag_data.tags:
             result = await session.exec(
@@ -48,10 +49,7 @@ class TagService:
         result = await session.exec(statement)
         tag = result.first()
         if tag:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Tag exists"
-            )
+            raise TagAlreadyExists()
         new_tag =Tags(name=tag_data.name)
         session.add(new_tag)
         await session.commit()
@@ -74,10 +72,7 @@ class TagService:
     async def delete_tag(self,tag_uid:str, session:AsyncSession):
         tag = await  self.get_tag_by_uid(tag_uid,session)
         if not tag:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="tag does not exist"
-            )
+            raise TagNotFound()
         await session.delete(tag)
         await session.commit()
     
