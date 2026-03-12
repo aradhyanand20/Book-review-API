@@ -46,7 +46,7 @@ app.add_exception_handler(
     UserAlreadyExists,
     create_exception_handler(
         status_code= status.HTTP_403_FORBIDDEN,
-        intial_detail={
+        initial_detail={
             "message":"User with email already exists",
             "error_code":"user_exists"
         }
@@ -57,7 +57,7 @@ app.add_exception_handler(
     UserNotFound,
     create_exception_handler(
         status_code=status.HTTP_404_NOT_FOUND,
-        intial_detail={
+        initial_detail={
             "message":"UserNot Found",
             "error_code":"user_not_found"
         }

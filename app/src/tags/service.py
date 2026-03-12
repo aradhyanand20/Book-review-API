@@ -7,6 +7,8 @@ from src.db.models import Tags
 from .schemas import TagAddModel, TagCreateModel
 from uuid import UUID
 from src.errors import TagNotFound, BookNotFound, TagAlreadyExists
+from sqlalchemy.orm import selectinload
+from src.db.models import Book
 
 book_service = BookService()
 
@@ -21,7 +23,13 @@ class TagService:
         return result.all()
     
     async def add_tag_to_books(self,book_uid:str,tag_data:TagAddModel,session:AsyncSession):
-        book = await book_service.get_book(book_uid=book_uid, session=session)
+        statement = (
+            select(Book)
+            .where(Book.uid == book_uid)
+            .options(selectinload(Book.tags))
+        )
+        result = await session.exec(statement)
+        book = result.first()
         if not book:
             raise BookNotFound()
         
