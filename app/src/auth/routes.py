@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, status
-from .schemas import UserCreateModel, UserModel, UserLoginModel,UserBookModel
+from .schemas import UserCreateModel, UserModel, UserLoginModel,UserBookModel, EmailModel
 from .service import UserService
 from src.db.main import get_session
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -9,6 +9,7 @@ from datetime import timedelta, datetime, timezone
 from fastapi.responses import JSONResponse
 from .dependencies import RefreshTokenBearer, AccessTokenBearer, get_current_user, RoleChecker
 from src.db.redis import add_jti_to_blocklist
+from src.mail import create_message
 
 from src.errors import UserAlreadyExists,UserNotFound, InvalidCredentials,InvalidToken
 
@@ -20,6 +21,17 @@ role_checker = RoleChecker(['admin', 'user'])
 
 
 REFRESH_TOKEN_EXPIRY = 2
+
+
+@auth_router.post("/send email")
+async def send_email(emails:EmailModel):
+    emails = emails.addresses
+    html = "<h1>Welcome to bookly</h1>"
+    message = create_message(
+        recipients=emails,
+        subject="Welcome",
+        body=html
+    )
 @auth_router.post('/signup',
                   response_model=UserModel,
                   status_code= status.HTTP_201_CREATED)

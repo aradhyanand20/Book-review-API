@@ -24,5 +24,6 @@ class Settings(BaseSettings):
         env_file= ".env",
         extra= "ignore"
     )
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 config = Settings()
