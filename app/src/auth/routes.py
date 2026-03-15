@@ -9,7 +9,7 @@ from datetime import timedelta, datetime, timezone
 from fastapi.responses import JSONResponse
 from .dependencies import RefreshTokenBearer, AccessTokenBearer, get_current_user, RoleChecker
 from src.db.redis import add_jti_to_blocklist
-from src.mail import create_message
+from src.mail import create_message, mail
 
 from src.errors import UserAlreadyExists,UserNotFound, InvalidCredentials,InvalidToken
 
@@ -23,7 +23,7 @@ role_checker = RoleChecker(['admin', 'user'])
 REFRESH_TOKEN_EXPIRY = 2
 
 
-@auth_router.post("/send email")
+@auth_router.post("/send-email")
 async def send_email(emails:EmailModel):
     emails = emails.addresses
     html = "<h1>Welcome to bookly</h1>"
@@ -32,6 +32,7 @@ async def send_email(emails:EmailModel):
         subject="Welcome",
         body=html
     )
+    await mail.send_message(message)
 @auth_router.post('/signup',
                   response_model=UserModel,
                   status_code= status.HTTP_201_CREATED)
