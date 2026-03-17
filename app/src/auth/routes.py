@@ -46,20 +46,48 @@ async def create_user_account(user_data:UserCreateModel,
 
     token = create_url_safe_token({"email":email})
     
-    link = f"http://{config.DOMAIN}/api/v1/auth/verify/{token}"
-    html_message = f""" <h1>Vrify your email</h1>
-    <p> Please click this <a href= {link}">link</a> to verify your email</p>"""
+    link = f"http://127.0.0.1:8000/api/v1/auth/verify/{token}"
+    html_message = f"""
+<html>
+<body>
+<h1>Verify your email</h1>
+<p>
+Click below to verify your email:<br>
+<a href="{link}">Verify Email</a>
+</p>
+</body>
+</html>
+"""
 
     message = create_message(
         recipients=[email],
         subject="verify your email",
         body=html_message
     )
-    await mail.send_message
+    await mail.send_message(message)
     return {
         "message":"Account Created! Check email to verify your account",
         "user": new_user
     }
+
+@auth_router.get('/verify/{token}')
+async def verify_user_account(token:str, session:AsyncSession= Depends(get_session)):
+    token_data = decode_url_safe_token(token)
+    user_email = token_data.get('email')
+
+    if user_email:
+        user = await user_service.get_user_by_email(user_email,session)
+        if not user:
+            raise UserNotFound()
+        await user_service.update_user(user, {'is_verified': True}, session)
+        return JSONResponse(
+            content={"message": "Account verified successfully"},
+            status_code=status.HTTP_200_OK
+        )
+    return JSONResponse(
+        content={"message": "Error occurred during the varification"},
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    )
 
 
 @auth_router.post('/login')

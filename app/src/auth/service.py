@@ -18,7 +18,7 @@ class UserService:
         user_data_dict = user_data.model_dump()
         user_data_dict.pop('password') 
         user_data_dict['password_hash'] = generate_passwd_hash(user_data.password) 
-        new_user['role'] = "user"
+        user_data_dict['role'] = "user"
 
         new_user = User(
             **user_data_dict
@@ -30,4 +30,9 @@ class UserService:
 
         return new_user
     
+    async def update_user(self, user:User, user_data:dict, session:AsyncSession):
+        for k,v in user_data.items():
+            setattr(user,k,v)
+        await session.commit()
+        return user
 
