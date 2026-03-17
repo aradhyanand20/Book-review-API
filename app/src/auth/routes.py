@@ -55,7 +55,7 @@ async def create_user_account(user_data:UserCreateModel,
         subject="verify your email",
         body=html_message
     )
-    await mail.send_message
+    await mail.send_message(message)
     return {
         "message":"Account Created! Check email to verify your account",
         "user": new_user
