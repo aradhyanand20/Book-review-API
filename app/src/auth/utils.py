@@ -38,7 +38,7 @@ def decode_token(token:str) -> dict:
         )
         return token_data
     
-    except jwt.PyJWKError as e:
+    except jwt.PyJWTError as e:
         logging.exception(e)
         return None
     except ExpiredSignatureError:

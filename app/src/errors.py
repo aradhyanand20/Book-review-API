@@ -52,6 +52,10 @@ class UserNotFound(BooklyException):
     """User Not found"""
     pass
 
+class AccountNotVerified(Exception):
+    """Account is not verified need verification"""
+    pass
+
 
 
 
@@ -74,6 +78,19 @@ def register_all_errors( app:FastAPI):
         }
     )
 )
+    app.add_exception_handler(
+        AccountNotVerified,
+        create_exception_handler(
+            status_code= status.HTTP_404_NOT_FOUND,
+            initial_detail={
+                "message": "Account is not verified",
+                "error_code": "account_not _verified",
+                "resolution":"Please check you inbox for verification details"
+            }
+        )
+    )
+
+
     app.add_exception_handler(
     UserNotFound,
     create_exception_handler(

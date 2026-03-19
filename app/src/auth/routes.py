@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, status
-from .schemas import UserCreateModel, UserModel, UserLoginModel,UserBookModel, EmailModel
+from .schemas import UserCreateModel, UserModel, UserLoginModel,UserBookModel, EmailModel, PasswordResetRequestModel
 from .service import UserService
 from src.db.main import get_session
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -167,3 +167,46 @@ async def revoke_token(token_details:dict= Depends(AccessTokenBearer())):
         },
         status_code= status.HTTP_200_OK
     )
+
+@auth_router('/password-reset-request')
+async def password_reset_request(email_data:PasswordResetRequestModel):
+    email = email_data.email
+    token = create_url_safe_token({"email":email})
+    link = f"http://{config.DOMAIN}/api/v1/auth/verify/{token}"
+    html_message = link = f"http://127.0.0.1:8000/api/v1/auth/verify/{token}"
+    html_message = f"""
+<html>
+<body>
+<h1>Rest your password</h1>
+<p>
+Click below to verify your email:<br>
+<a href="{link}">Reset your pasword</a>
+</p>
+</body>
+</html>
+"""
+
+    message = create_message(
+        recipients=[email],
+        subject="reset your password",
+        body=html_message
+    )
+    await mail.send_message(message)
+    return JSONResponse( content= {
+        "message":"please check yor email for further instruction",
+    },
+    status_code= status.HTTP_200_OK,
+    )
+
+	
+# Response body
+# Download
+# {
+#   "message": "Login successful",
+#   "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImVtYWlsIjoiYXJhZGh5YW5hbmQyMEBnbWFpbC5jb20iLCJ1c2VyX3VpZCI6ImJkNjY0ZjFmLTZjZjEtNGE2Yi04ODdhLWJkNzA1ZmRkMThjOSIsInJvbGUiOiJ1c2VyIn0sImV4cCI6MTc3Mzk3MDk3MiwianRpIjoiNDAxYTJhNTMtYjNlMS00MTI2LWI5YzUtZjBhMGRiOTMwNTJmIiwicmVmcmVzaCI6ZmFsc2V9.DFCvZGPPb0qPM5DAy5ifV5u7z1ywPdc_umBvFY3Mq9g",
+#   "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImVtYWlsIjoiYXJhZGh5YW5hbmQyMEBnbWFpbC5jb20iLCJ1c2VyX3VpZCI6ImJkNjY0ZjFmLTZjZjEtNGE2Yi04ODdhLWJkNzA1ZmRkMThjOSJ9LCJleHAiOjE3NzQxNDAxNzIsImp0aSI6ImFjYjk1N2RiLTU2NjItNDk1NS05MThiLTY4N2M3YmMzZTA5YSIsInJlZnJlc2giOnRydWV9.iyOjgmopgQ2HPO-4exoqfSog0GjufGq47e3ZuINCsGk",
+#   "user": {
+#     "email": "aradhyanand20@gmail.com",
+#     "uid": "bd664f1f-6cf1-4a6b-887a-bd705fdd18c9"
+#   }
+# }}
