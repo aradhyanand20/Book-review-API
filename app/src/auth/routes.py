@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, status
-from .schemas import UserCreateModel, UserModel, UserLoginModel,UserBookModel, EmailModel, PasswordResetRequestModel
+from .schemas import UserCreateModel, UserModel, UserLoginModel,UserBookModel, EmailModel, PasswordResetRequestModel, PasswordResetConfirmModel
 from .service import UserService
 from src.db.main import get_session
 from sqlmodel.ext.asyncio.session import AsyncSession
 from fastapi.exceptions import HTTPException
-from .utils import create_access_token, decode_token, verify_password, create_url_safe_token,decode_url_safe_token
+from .utils import create_access_token, decode_token, verify_password, create_url_safe_token,decode_url_safe_token, generate_passwd_hash
 from datetime import timedelta, datetime, timezone
 from fastapi.responses import JSONResponse
 from .dependencies import RefreshTokenBearer, AccessTokenBearer, get_current_user, RoleChecker
@@ -168,7 +168,7 @@ async def revoke_token(token_details:dict= Depends(AccessTokenBearer())):
         status_code= status.HTTP_200_OK
     )
 
-@auth_router('/password-reset-request')
+@auth_router.post('/password-reset-request')
 async def password_reset_request(email_data:PasswordResetRequestModel):
     email = email_data.email
     token = create_url_safe_token({"email":email})
@@ -198,15 +198,67 @@ Click below to verify your email:<br>
     status_code= status.HTTP_200_OK,
     )
 
-	
-# Response body
-# Download
-# {
-#   "message": "Login successful",
-#   "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImVtYWlsIjoiYXJhZGh5YW5hbmQyMEBnbWFpbC5jb20iLCJ1c2VyX3VpZCI6ImJkNjY0ZjFmLTZjZjEtNGE2Yi04ODdhLWJkNzA1ZmRkMThjOSIsInJvbGUiOiJ1c2VyIn0sImV4cCI6MTc3Mzk3MDk3MiwianRpIjoiNDAxYTJhNTMtYjNlMS00MTI2LWI5YzUtZjBhMGRiOTMwNTJmIiwicmVmcmVzaCI6ZmFsc2V9.DFCvZGPPb0qPM5DAy5ifV5u7z1ywPdc_umBvFY3Mq9g",
-#   "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImVtYWlsIjoiYXJhZGh5YW5hbmQyMEBnbWFpbC5jb20iLCJ1c2VyX3VpZCI6ImJkNjY0ZjFmLTZjZjEtNGE2Yi04ODdhLWJkNzA1ZmRkMThjOSJ9LCJleHAiOjE3NzQxNDAxNzIsImp0aSI6ImFjYjk1N2RiLTU2NjItNDk1NS05MThiLTY4N2M3YmMzZTA5YSIsInJlZnJlc2giOnRydWV9.iyOjgmopgQ2HPO-4exoqfSog0GjufGq47e3ZuINCsGk",
-#   "user": {
-#     "email": "aradhyanand20@gmail.com",
-#     "uid": "bd664f1f-6cf1-4a6b-887a-bd705fdd18c9"
-#   }
-# }}
+@auth_router.post("/password-reset-confirm/{token}")	
+async def reset_account_password(
+    token:str,
+    passwords:PasswordResetConfirmModel,
+    session: AsyncSession =Depends(get_session)
+):
+    
+    new_password = passwords.new_password
+    confirm_password =  passwords.confirm_new_password
+    if new_password != confirm_password:
+        raise HTTPException(
+            detail="Password do not match", status_code=status.HTTP_400_BAD_REQUEST
+        )
+    token_data = decode_url_safe_token(token)
+    user_email = token_data.get("email")
+
+    if user_email:
+        user = await user_service.get_user_by_email(user_email, session)
+
+        if not user:
+            raise UserNotFound()
+        passwd_hash =generate_passwd_hash(new_password)
+        await user_service.update_user(user,{"password_hash": passwd_hash},session)
+
+        return JSONResponse(
+            content={"message":"Account password reset successful"},
+            status_code=status.HTTP_200_OK
+        )
+    return JSONResponse(
+        content={"Error occurred during password reset"},
+         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+
+    )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

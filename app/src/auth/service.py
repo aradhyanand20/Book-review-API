@@ -34,5 +34,6 @@ class UserService:
         for k,v in user_data.items():
             setattr(user,k,v)
         await session.commit()
+        await session.refresh(user)
         return user
 
