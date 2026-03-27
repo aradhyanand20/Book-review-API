@@ -27,6 +27,7 @@ app = FastAPI(
     title="Bookly",
     description=" A REST API for the book review web service",
     version= ver,
+    lifespan=life_span,
     swagger_ui_parameters={"persistAuthorization": True}
 )
 

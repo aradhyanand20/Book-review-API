@@ -12,6 +12,7 @@ from src.db.redis import add_jti_to_blocklist
 from src.mail import create_message, mail
 from src.config import config
 from src.errors import UserAlreadyExists,UserNotFound, InvalidCredentials,InvalidToken
+from src.celery_task import send_email
 
 
 
@@ -27,12 +28,11 @@ REFRESH_TOKEN_EXPIRY = 2
 async def send_email(emails:EmailModel):
     emails = emails.addresses
     html = "<h1>Welcome to bookly</h1>"
-    message = create_message(
-        recipients=emails,
-        subject="Welcome",
-        body=html
-    )
-    await mail.send_message(message)
+    subject ="Welcome to our app"
+    send_email.delay(emails,subject,html)
+    subject = "Welcome to our app"
+    return {"message": "Email sent successfully"}
+
 @auth_router.post('/signup',
                   status_code= status.HTTP_201_CREATED)
 async def create_user_account(bg_task:BackgroundTasks,user_data:UserCreateModel,
@@ -47,7 +47,7 @@ async def create_user_account(bg_task:BackgroundTasks,user_data:UserCreateModel,
     token = create_url_safe_token({"email":email})
     
     link = f"http://127.0.0.1:8000/api/v1/auth/verify/{token}"
-    html_message = f"""
+    html = f"""
 <html>
 <body>
 <h1>Verify your email</h1>
@@ -59,16 +59,12 @@ Click below to verify your email:<br>
 </html>
 """
 
-    message = create_message(
-        recipients=[email],
-        subject="verify your email",
-        body=html_message
-    )
-    bg_task.add_task(mail.send_message,message)
-    return {
-        "message":"Account Created! Check email to verify your account",
-        "user": new_user
-    }
+    emails = [email]
+    subject = "Verify your email"
+    send_email.delay(emails,subject,html)
+    return {"message": "Account Created! Check email to verify account",
+            "user": new_user}
+
 
 @auth_router.get('/verify/{token}')
 async def verify_user_account(token:str, session:AsyncSession= Depends(get_session)):
