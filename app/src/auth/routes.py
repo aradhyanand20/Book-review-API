@@ -25,7 +25,7 @@ REFRESH_TOKEN_EXPIRY = 2
 
 
 @auth_router.post("/send-email")
-async def send_email(emails:EmailModel):
+async def send_email_route(emails:EmailModel):
     emails = emails.addresses
     html = "<h1>Welcome to bookly</h1>"
     subject ="Welcome to our app"
