@@ -14,7 +14,7 @@ def get_mock_session():
 
 access_token_bearer = AccessTokenBearer()
 refresh_token_bearer = RefreshTokenBearer()
-role_checker = RoleChecker()
+role_checker = RoleChecker(['admin'])
 
 
 app.dependency_overrides[get_session] = get_mock_session
@@ -35,5 +35,5 @@ def test_client():
     return TestClient(app)
 
 @pytest.fixture
-def book_service():
+def fake_book_service():
     return mock_book_service(app)
