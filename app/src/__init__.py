@@ -28,7 +28,9 @@ app = FastAPI(
     description=" A REST API for the book review web service",
     version= ver,
     lifespan=life_span,
-    swagger_ui_parameters={"persistAuthorization": True}
+    swagger_ui_parameters={"persistAuthorization": True},
+    openapi_url="/api/v1/openapi.json" #for schemathesis testing
+
 )
 
 @app.exception_handler(500)
